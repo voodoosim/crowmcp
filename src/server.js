@@ -262,7 +262,8 @@ if (isHttp) {
   // STDIO 모드
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.log(`
+  // console.log 제거하거나 console.error로 변경
+  console.error(`
 🚀 Ultimate Dev Assistant v3 시작됨!
 📍 STDIO 모드
 🛠️ 도구 개수: ${allTools.length}개
