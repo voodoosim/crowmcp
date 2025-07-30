@@ -1,9 +1,53 @@
 // 모든 도구들을 통합 관리
+import { z } from 'zod';
 import { filesystemTools, handleFilesystem } from './filesystem.js';
 import { systemTools, handleSystem } from './system.js';
 import { redisTools, handleRedis } from './redis.js';
 import { notionTools, handleNotion } from './notion.js';
 import { refTools, handleRef } from './ref.js';
+
+// JSON Schema를 Zod 스키마로 변환하는 함수
+function convertToZodSchema(jsonSchema) {
+  if (!jsonSchema || !jsonSchema.properties) {
+    return z.object({});
+  }
+
+  const zodShape = {};
+  
+  for (const [key, prop] of Object.entries(jsonSchema.properties)) {
+    let zodType;
+    
+    switch (prop.type) {
+      case 'string':
+        zodType = z.string();
+        if (prop.description) zodType = zodType.describe(prop.description);
+        if (prop.default !== undefined) zodType = zodType.default(prop.default);
+        if (prop.enum) zodType = z.enum(prop.enum);
+        break;
+      case 'number':
+        zodType = z.number();
+        if (prop.description) zodType = zodType.describe(prop.description);
+        if (prop.default !== undefined) zodType = zodType.default(prop.default);
+        break;
+      case 'boolean':
+        zodType = z.boolean();
+        if (prop.description) zodType = zodType.describe(prop.description);
+        if (prop.default !== undefined) zodType = zodType.default(prop.default);
+        break;
+      default:
+        zodType = z.any();
+    }
+    
+    // required 체크
+    if (!jsonSchema.required || !jsonSchema.required.includes(key)) {
+      zodType = zodType.optional();
+    }
+    
+    zodShape[key] = zodType;
+  }
+  
+  return z.object(zodShape);
+}
 
 // 모든 도구 통합
 export const allTools = [
@@ -40,7 +84,7 @@ export async function executeTool(toolName, args) {
       error: `도구를 찾을 수 없습니다: ${toolName}`
     };
   }
-
+  
   try {
     return await handler(toolName, args);
   } catch (error) {
@@ -54,19 +98,22 @@ export async function executeTool(toolName, args) {
 // MCP 서버에 도구 등록하는 헬퍼 함수
 export function registerAllTools(server) {
   allTools.forEach(tool => {
+    // JSON Schema를 Zod 스키마로 변환
+    const zodSchema = convertToZodSchema(tool.inputSchema);
+    
     server.registerTool(
       tool.name,
       {
         title: tool.name,
         description: tool.description,
-        inputSchema: tool.inputSchema
+        inputSchema: zodSchema  // Zod 스키마 사용
       },
       async (args) => {
         return await executeTool(tool.name, args);
       }
     );
   });
-
+  
   console.log(`✅ ${allTools.length}개의 도구가 등록되었습니다:`);
   allTools.forEach(tool => {
     console.log(`  - ${tool.description} (${tool.name})`);
