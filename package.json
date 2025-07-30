@@ -1,8 +1,14 @@
 {
-  "name": "mcp-dev-assistant",
-  "version": "1.0.0",
+  "name": "crowmcp",
+  "version": "3.0.0",
   "type": "module",
-  "main": "src/server.js",
+  "description": "MCP Dev Assistant with 13 powerful tools",
+  "author": "voodoosim",
+  "license": "MIT",
+  "bin": {
+    "crowmcp": "./src/server.js"
+  },
+  "main": "./src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js"
@@ -16,5 +22,17 @@
     "helmet": "^7.1.0",
     "redis": "^5.6.1",
     "zod": "^3.25.76"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "assistant",
+    "dev-tools",
+    "redis",
+    "notion"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/voodoosim/crowmcp.git"
   }
 }
