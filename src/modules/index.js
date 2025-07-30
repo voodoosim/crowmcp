@@ -11,7 +11,6 @@ function convertToZodSchema(jsonSchema) {
   if (!jsonSchema || !jsonSchema.properties) {
     return z.object({});
   }
-
   const zodShape = {};
   
   for (const [key, prop] of Object.entries(jsonSchema.properties)) {
@@ -114,8 +113,8 @@ export function registerAllTools(server) {
     );
   });
   
-  console.log(`✅ ${allTools.length}개의 도구가 등록되었습니다:`);
+  console.error(`✅ ${allTools.length}개의 도구가 등록되었습니다:`);  // ✅ 수정됨
   allTools.forEach(tool => {
-    console.log(`  - ${tool.description} (${tool.name})`);
+    console.error(`  - ${tool.description} (${tool.name})`);  // ✅ 수정됨
   });
 }
