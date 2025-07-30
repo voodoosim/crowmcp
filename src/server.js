@@ -34,7 +34,7 @@ redis.connect().catch(err => {
   console.error('❌ Redis 연결 실패:', err.message);
 });
 
-redis.on('connect', () => console.log('🔴 Redis 연결됨'));
+redis.on('connect', () => console.error('🔴 Redis 연결됨'));
 redis.on('error', (err) => console.error('Redis 에러:', err));
 
 // MCP 서버 생성
@@ -144,7 +144,7 @@ app.post('/mcp/sse', async (req, res) => {
     sessionStats.active++;
     global.activeSessions++;
 
-    console.log(`📡 새로운 SSE 연결 - 활성 세션: ${sessionStats.active}`);
+    console.error(`📡 새로운 SSE 연결 - 활성 세션: ${sessionStats.active}`);
 
     const transport = new StreamableHTTPServerTransport(req, res);
     await server.connect(transport);
@@ -153,7 +153,7 @@ app.post('/mcp/sse', async (req, res) => {
     res.on('close', () => {
       sessionStats.active--;
       global.activeSessions--;
-      console.log(`📡 SSE 연결 종료 - 활성 세션: ${sessionStats.active}`);
+      console.error(`📡 SSE 연결 종료 - 활성 세션: ${sessionStats.active}`);
     });
 
     // 에러 처리
@@ -205,12 +205,12 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // 종료 처리
 process.on('SIGINT', async () => {
-  console.log('\n🛑 서버 종료 중...');
+  console.error('\n🛑 서버 종료 중...');
 
   // Redis 연결 종료
   if (redis.isReady) {
     await redis.quit();
-    console.log('✅ Redis 연결 종료됨');
+    console.error('✅ Redis 연결 종료됨');
   }
 
   // 약간의 지연 후 종료 (진행 중인 요청 완료를 위해)
@@ -220,7 +220,7 @@ process.on('SIGINT', async () => {
 });
 
 process.on('SIGTERM', async () => {
-  console.log('\n🛑 서버 종료 요청 (SIGTERM)');
+  console.error('\n🛑 서버 종료 요청 (SIGTERM)');
 
   if (redis.isReady) {
     await redis.quit();
@@ -237,7 +237,7 @@ if (isHttp) {
   const HOST = '0.0.0.0'; // 모든 인터페이스에서 접속 가능
 
   const httpServer = app.listen(PORT, HOST, () => {
-    console.log(`
+    console.error(`
 🚀 Ultimate Dev Assistant v3 시작됨!
 📍 HTTP 모드: http://localhost:${PORT}
 🌐 외부 접속: http://0.0.0.0:${PORT}
@@ -262,7 +262,6 @@ if (isHttp) {
   // STDIO 모드
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  // console.log 제거하거나 console.error로 변경
   console.error(`
 🚀 Ultimate Dev Assistant v3 시작됨!
 📍 STDIO 모드
